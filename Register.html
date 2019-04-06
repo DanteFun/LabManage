@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>教师注册</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <script src="js/jquery.min.js"></script>
+    <script src="js/popper.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+</head>
+<body>
+<div class = container-fluid>
+    <form action="/action_page.php">
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text">教师姓名</span>
+            </div>
+            <input type="text" class="form-control" placeholder="2~8个汉字" id="teacher_name" name="teachername">
+        </div>
+
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text">教师编号</span>
+            </div>
+            <input type="text" class="form-control" placeholder="长度为6的数字" id="teacher_Id" name="teacherId">
+        </div>
+
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text">密码</span>
+            </div>
+            <input type="password" class="form-control" placeholder="长度在20个字符以内的数字、字母、符号的组合" id="teacher_pwd" name="teacher_pwd">
+        </div>
+
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text">重复密码</span>
+            </div>
+            <input type="password" class="form-control" placeholder="长度在20个字符以内的数字、字母、符号的组合" id="teacher_pwd1" name="teacher_pwd1">
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+
+</div>
+</body>
+</html>

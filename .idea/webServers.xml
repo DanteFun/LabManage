@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="3600366e-9b99-4534-80c9-5270b480bef2" name="DanteFun" url="http://localhost">
+        <fileTransfer host="69.194.9.147" port="27697" accessType="SFTP">
+          <option name="port" value="27697" />
+        </fileTransfer>
+      </webServer>
+      <webServer id="ed6b9e83-bc34-412d-818a-43e93abe0371" name="Local" url="http://localhost">
+        <fileTransfer port="0" accessType="LOCAL" />
+      </webServer>
+    </option>
+  </component>
+</project>

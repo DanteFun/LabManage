@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>DataBaseManager</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <script src="js/jquery.min.js"></script>
+    <script src="js/popper.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/jquery-3.3.1.js"></script>
+    <script src="js/xlsx.full.min.js"></script>
+    <style>
+        #Login,#Register,#Import_TB{
+            top: 33%;
+            left: 33%;
+            position: fixed;
+            width: 400px;
+            display: none;
+            margin: auto;
+        }
+        #Mask_Layer{
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            overflow: visible;
+        }
+    </style>
+    <script>
+        function Login_Form_Submit() {
+            if(document.pressed == 'enter')
+            {
+                document.Login_Form.action="DataBaseManage.html";
+            }
+            else
+            {
+                $("#Login_Form").hide();
+            }
+            return true;
+        }
+    </script>
+    <script>
+        $(document).ready(function(){
+            $("#Login_Button").click(function(){
+                $("#Register").hide();
+                $("#Login").fadeIn("slow");
+            });
+        });
+        $(document).ready(function(){
+            $("#Register_Button").click(function(){
+                $("#Login").hide();
+                $("#Register").fadeIn("slow");
+            });
+        });
+    </script>
+</head>
+<body>
+<div id="Mask_Layer">
+    <div class="navbar navbar-expand-sm bg-dark navbar-dark">
+        <a class="navbar-brand" href="#">Open Lab</a>
+        <ul class="nav nav-pills">
+            <li class="nav-item">
+                <a class="nav-link text-white" id = "Login_Button">登录</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white" id = "Register_Button">注册</a>
+            </li>
+        </ul>
+    </div>
+    <br>
+    <div id="Login" class="container">
+        <form name = "Login_Form" onsubmit="return Login_Form_Submit();" method="post">
+            <div class="form-group">
+                <label for="Login_name">姓名：</label>
+                <input type="text" class="form-control" placeholder="请输入姓名或学号" id="Login_name" name="name">
+                <label for="Login_name">密码：</label>
+                <input type="password" class="form-control" placeholder="请输入密码" id="Login_password" name="password">
+                <label><input type="radio" name = "optradio" id = "Is_Student">学生</label>
+                <label><input type="radio" name = "optradio" id = "Is_Teacher">老师</label>
+            </div>
+            <button type="submit" class="btn btn-primary" value="enter" onclick="document.pressed=this.value">确认</button>
+            <button type="submit" class="btn btn-primary" value="cancel" onclick="document.pressed=this.value">取消</button>
+        </form>
+    </div>
+    <div id="Register" class="container">
+        <form action="PHP\Login.php" method="post">
+            <div class="form-group">
+                <label for="Register_name">姓名：</label>
+                <input type="text" class="form-control" placeholder="请输入姓名或学号" id="Register_name" name="Register_name">
+                <label for="Register_password">密码：</label>
+                <input type="password" class="form-control" placeholder="请输入密码" id="Register_password" name="Register_password">
+                <input type="password" class="form-control" placeholder="请再次输入密码" id="Register_password1" name="Register_password1">
+                <label><input type="radio" name = "optradio" id = "IsStudent">学生</label>
+                <label><input type="radio" name = "optradio" name = "IsTeacher">老师</label>
+            </div>
+            <button type="submit" class="btn btn-primary" id="Register_Enter">确认</button>
+        </form>
+    </div>
+    <div id="Import_TB" class="container">
+        <div class="custom-file mb-3">
+            <input type="file" class="custom-file-input" id="customFile" name="filename">
+            <label class="custom-file-label" for="customFile">选择文件</label>
+        </div>
+    </div>
+</div>
+</body>
+</html>

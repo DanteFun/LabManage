@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DataBaseManager</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <script src="js/jquery.min.js"></script>
+    <script src="js/popper.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/jquery-3.3.1.js"></script>
+    <script src="js/xlsx.full.min.js"></script>
+    <style>
+        #insert_DB,#insert_TB,#Import_TB{
+            top: 33%;
+            left: 33%;
+            position: fixed;
+            width: 400px;
+            display: none;
+            margin: auto;
+        }
+        #Mask_Layer{
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            overflow: visible;
+        }
+    </style>
+    <script>
+        var tableElem = 0;
+        $(document).ready(function(){
+            $("#InsertDB").click(function(){
+                $("#insert_DB").fadeIn("slow");
+            });
+        });
+        $(document).ready(function(){
+            $("#InsertTB").click(function(){
+                $("#insert_TB").fadeIn("slow");
+            });
+        });
+        $(document).ready(function(){
+            $("#ImportEX").click(function(){
+                $("#Import_TB").fadeIn("slow");
+            });
+        });
+        $(document).ready(function(){
+            $("#AddTableElem").click(function(){
+                $("#insert_TB").hide();
+                tableElem++;
+                if(tableElem < 6)
+                {
+                    $("#Insert_Table_Form").append('<label name = '+tableElem+' id="Lable'+tableElem+'">字段'+tableElem+'：</label><input type="text" class="form-control" placeholder="请输入英文字符" id="TB_Elem'+tableElem+'" name="TableElem'+tableElem+'">');
+                }
+                else
+                {
+                    tableElem = 5;
+                    alert("单表最多含有5个字段！");
+                }
+                $("#insert_TB").fadeIn("slow");
+            });
+        });
+        $(document).ready(function(){
+            $("#DeleteTableElem").click(function(){
+                $("#insert_TB").hide();
+                var tempInput = "#TB_Elem"+tableElem;
+                var tempLable = "#Lable"+tableElem;
+                if(tableElem >0)
+                {
+                    $(tempInput).remove();
+                    $(tempLable).remove();
+                    tableElem--;
+                }
+                else
+                {
+                    //$("#Insert_Table_Form").remove('<label>字段'+tableElem+'：</label><input type="text" class="form-control" placeholder="请输入英文字符" id="DB_name" name="TableElem'+tableElem+'">');
+                    alert("当前还没有任何字段！");
+                }
+                $("#insert_TB").fadeIn("slow");
+            });
+        });
+    </script>
+</head>
+<body>
+<div id="Mask_Layer">
+    <nav class="navbar navbar-expand-sm bg-dark navbar-dark" id="navdrawer">
+        <a class="navbar-brand" href="#">Open Lab</a>
+        <ul class="navbar-nav">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="link_Database" data-toggle="dropdown">
+                    数据库
+                </a>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="#" id="InsertDB">添加</a>
+                    <a class="dropdown-item" href="#" id="DeleteDB">删除</a>
+                    <a class="dropdown-item" href="#" id="AllDeleteDB">全部删除</a>
+                </div>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="link_Table" data-toggle="dropdown">
+                    表
+                </a>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="#" id="InsertTB">添加表</a>
+                    <a class="dropdown-item" href="#" id="DeleteTB">删除表</a>
+                    <a class="dropdown-item" href="#" id="ImportEX">导入Excel</a>
+                    <a class="dropdown-item" href="#" id="ImportTB">导入数据库</a>
+                    <a class="dropdown-item" href="#" id="AllDeleteTB">全部删除</a>
+                </div>
+            </li>
+        </ul>
+    </nav>
+    <br>
+    <div id="insert_DB" class="container">
+        <form action="PHP\DataBase.php" method="post">
+            <div class="form-group">
+                <label for="DB_name">数据库名：</label>
+                <input type="text" class="form-control" placeholder="请输入英文字符" id="DB_name" name="Databasename">
+            </div>
+            <button type="submit" class="btn btn-primary" id="submit_DB">确认</button>
+        </form>
+    </div>
+    <div id="insert_TB" class="container">
+        <button type="button" class="btn btn-outline-light text-dark" id="AddTableElem">
+            添加字段
+        </button>
+        <button type="button" class="btn btn-outline-light text-dark" id="DeleteTableElem">
+            删除字段
+        </button>
+        <form action="PHP\DataBaseTest.php" method="post">
+            <div class="form-group" id="Insert_Table_Form">
+                <label for="TB_name">表名：</label>
+                <input type="text" class="form-control" placeholder="请输入英文字符" id="TB_name" name="Tablename">
+            </div>
+            <button type="submit" class="btn btn-primary" id="submit_TB">确认</button>
+        </form>
+    </div>
+    <div id="Import_TB" class="container">
+        <div class="custom-file mb-3">
+            <input type="file" class="custom-file-input" id="customFile" name="filename">
+            <label class="custom-file-label" for="customFile">选择文件</label>
+        </div>
+    </div>
+</div>
+<table class="table table-striped" id="File_Content">
+
+</table>
+</body>
+<script>
+    $('#customFile').change(function(e){
+        var reader = new FileReader();
+        reader.readAsArrayBuffer(e.target.files[0]);
+        reader.onload = function(e) {
+            var data = new Uint8Array(reader.result);
+            var wb = XLSX.read(data,{type:'array'});
+            worksheet = wb.Sheets[wb.SheetNames[0]];
+            importExcel(worksheet,wb.SheetNames[0]);
+            console.log(typeof(wb.SheetNames[0]));
+            $('#Import_TB').hide();
+        }
+    });
+    function importExcel(worksheet,sheetname) {
+        var temp = worksheet['!ref'];
+        var i = 0,j = 0;
+        var start_x,start_y,end_x,end_y;
+        while(i<temp.length)
+        {
+            if(temp[i] == ':')
+            {
+                break;
+            }
+            i++;
+        }
+        start_x = 'A';
+        start_y = 1;
+        end_x = temp[i+1];
+        end_y = temp.slice(i+2);
+        var table_content = new Array();
+        var table_rowlen = end_x.charCodeAt()-start_x.charCodeAt()+1;
+        var sheetnameS;
+        for(i = start_y;i <= end_y;i++)
+        {
+            table_content[i] = new Array(table_rowlen);
+            for(j = start_x.charCodeAt();j <= end_x.charCodeAt();j++)
+            {
+                temp = String.fromCharCode(j)+i;
+                table_content[i][j-start_x.charCodeAt()] = worksheet[temp].v;
+            }
+        }
+        console.log(table_content);
+        temp = JSON.stringify(table_content);
+        sheetnameS = JSON.stringify(sheetname);
+        $.post("PHP/Database.php",
+        {
+            table_name:sheetnameS,
+            table_content:temp,
+            table_length:table_rowlen
+        },
+        function(data,status){
+            alert("数据: \n" + data + "\n状态: " + status);
+        });
+    }
+</script>
+
+</html>
