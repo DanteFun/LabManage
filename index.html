@@ -10,6 +10,7 @@
     <script src="js/bootstrap.min.js"></script>
     <script src="js/jquery-3.3.1.js"></script>
     <script src="js/xlsx.full.min.js"></script>
+    <script src="js/jquery.form.js"></script>
     <style>
         #Login,#Register,#Import_TB{
             top: 33%;
@@ -27,19 +28,6 @@
         }
     </style>
     <script>
-        function Login_Form_Submit() {
-            if(document.pressed == 'enter')
-            {
-                document.Login_Form.action="DataBaseManage.html";
-            }
-            else
-            {
-                $("#Login_Form").hide();
-            }
-            return true;
-        }
-    </script>
-    <script>
         $(document).ready(function(){
             $("#Login_Button").click(function(){
                 $("#Register").hide();
@@ -52,9 +40,19 @@
                 $("#Register").fadeIn("slow");
             });
         });
+        function Form_Login_Ajax() {
+            $("#Login_Form").ajaxForm({
+                url:'PHP/LoginPage.php',
+                data_type:String,
+                success:function (response) {
+                    alert(response);
+                }
+            })
+        }
     </script>
 </head>
 <body>
+<img src="<?php echo $builder->inline(); ?>" />
 <div id="Mask_Layer">
     <div class="navbar navbar-expand-sm bg-dark navbar-dark">
         <a class="navbar-brand" href="#">Open Lab</a>
@@ -69,21 +67,21 @@
     </div>
     <br>
     <div id="Login" class="container">
-        <form name = "Login_Form" onsubmit="return Login_Form_Submit();" method="post">
+        <form id="Login_Form" action="PHP/LoginPage.php" method="post">
             <div class="form-group">
                 <label for="Login_name">姓名：</label>
-                <input type="text" class="form-control" placeholder="请输入姓名或学号" id="Login_name" name="name">
+                <input type="text" class="form-control" placeholder="请输入姓名" id="Login_name" name="name">
                 <label for="Login_name">密码：</label>
                 <input type="password" class="form-control" placeholder="请输入密码" id="Login_password" name="password">
-                <label><input type="radio" name = "optradio" id = "Is_Student">学生</label>
-                <label><input type="radio" name = "optradio" id = "Is_Teacher">老师</label>
+                <label><input type="radio" name = "optradio" value = "0">学生</label>
+                <label><input type="radio" name = "optradio" value = "1">老师</label>
             </div>
-            <button type="submit" class="btn btn-primary" value="enter" onclick="document.pressed=this.value">确认</button>
-            <button type="submit" class="btn btn-primary" value="cancel" onclick="document.pressed=this.value">取消</button>
+            <button class="btn btn-primary"  type="submit" value="enter" name = "submit" onclick="return Form_Login_Ajax()">确认</button>
+            <button class="btn btn-primary"  type="submit" value="cancel" name ="submit" onclick="return Form_Login_Ajax()">取消</button>
         </form>
     </div>
     <div id="Register" class="container">
-        <form action="PHP\Login.php" method="post">
+        <form action="PHP/captcha.php" method="post" id="Form_Register">
             <div class="form-group">
                 <label for="Register_name">姓名：</label>
                 <input type="text" class="form-control" placeholder="请输入姓名或学号" id="Register_name" name="Register_name">
@@ -105,3 +103,4 @@
 </div>
 </body>
 </html>
+

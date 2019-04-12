@@ -10,8 +10,9 @@
     <script src="js/bootstrap.min.js"></script>
     <script src="js/jquery-3.3.1.js"></script>
     <script src="js/xlsx.full.min.js"></script>
+    <script src="js/jquery.form.js"></script>
     <style>
-        #insert_DB,#insert_TB,#Import_TB{
+        #insert_DB,#insert_TB,#Import_TB,#Delete_TB{
             top: 33%;
             left: 33%;
             position: fixed;
@@ -31,6 +32,22 @@
         $(document).ready(function(){
             $("#InsertDB").click(function(){
                 $("#insert_DB").fadeIn("slow");
+            });
+        });
+        $(document).ready(function(){
+            $("#DeleteTB").click(function(){
+                $.post("PHP/DeleteTable.php",
+                {
+
+                },
+                function(data,status){
+                    var temp_data = JSON.parse(data);
+                    for(i=0;i<temp_data.length;i++)
+                    {
+                        $("#select_TBname").append('<option name = "delete_option" value ="'+temp_data[i]+'">'+temp_data[i]+'</option>');
+                    }
+                });
+                $("#Delete_TB").fadeIn("slow");
             });
         });
         $(document).ready(function(){
@@ -72,12 +89,53 @@
                 }
                 else
                 {
-                    //$("#Insert_Table_Form").remove('<label>字段'+tableElem+'：</label><input type="text" class="form-control" placeholder="请输入英文字符" id="DB_name" name="TableElem'+tableElem+'">');
                     alert("当前还没有任何字段！");
                 }
                 $("#insert_TB").fadeIn("slow");
             });
         });
+        $(document).ready(function(){
+            $("#DeleteTableElem").click(function(){
+                $("#insert_TB").hide();
+                var tempInput = "#TB_Elem"+tableElem;
+                var tempLable = "#Lable"+tableElem;
+                if(tableElem >0)
+                {
+                    $(tempInput).remove();
+                    $(tempLable).remove();
+                    tableElem--;
+                }
+                else
+                {
+                    alert("当前还没有任何字段！");
+                }
+                $("#insert_TB").fadeIn("slow");
+            });
+        });
+        function Form_Delete_Ajax() {
+            $("#Delete_TB").hide();
+            $("#Form_Delete").ajaxForm({
+                url:'PHP/Deleting.php',
+                data_type:String,
+                success:function (response) {
+                    alert(response);
+                }
+            })
+            $("#Delete_TB").refresh();
+            $("#Delete_TB").fadeIn("slow");
+        }
+        function Form_Insert_Ajax() {
+            $("#Insert_Form").ajaxForm({
+                url:'PHP/DataBaseTest.php',
+                data_type:String,
+                success:function (response) {
+                    alert(response);
+                }
+            })
+            $("#insert_TB").hide();
+            $("#insert_TB").refresh();
+            $("#insert_TB").fadeIn("slow");
+        }
     </script>
 </head>
 <body>
@@ -119,6 +177,16 @@
             <button type="submit" class="btn btn-primary" id="submit_DB">确认</button>
         </form>
     </div>
+    <div id="Delete_TB" class="container">
+        <form id="Form_Delete" action="PHP/Deleting.php" method="post">
+            <div class="form-group">
+                <label>表名：</label>
+                <select id="select_TBname" name="select_Name">
+                </select>
+            </div>
+            <button class="btn btn-primary" id="submit_DeDB" onclick="return Form_Delete_Ajax()">确认</button>
+        </form>
+    </div>
     <div id="insert_TB" class="container">
         <button type="button" class="btn btn-outline-light text-dark" id="AddTableElem">
             添加字段
@@ -126,12 +194,13 @@
         <button type="button" class="btn btn-outline-light text-dark" id="DeleteTableElem">
             删除字段
         </button>
-        <form action="PHP\DataBaseTest.php" method="post">
+        <form id ="Insert_Form" action="PHP/DataBaseTest.php" method="post">
             <div class="form-group" id="Insert_Table_Form">
                 <label for="TB_name">表名：</label>
                 <input type="text" class="form-control" placeholder="请输入英文字符" id="TB_name" name="Tablename">
             </div>
-            <button type="submit" class="btn btn-primary" id="submit_TB">确认</button>
+            <button class="btn btn-primary" name = "submit" value = "enter" onclick="return Form_Insert_Ajax()">确认</button>
+            <button class="btn btn-primary" name = "submit" value = "cancel" onclick="return Form_Insert_Ajax()">取消</button>
         </form>
     </div>
     <div id="Import_TB" class="container">
@@ -148,13 +217,16 @@
 <script>
     $('#customFile').change(function(e){
         var reader = new FileReader();
+        var i = 0;
         reader.readAsArrayBuffer(e.target.files[0]);
         reader.onload = function(e) {
             var data = new Uint8Array(reader.result);
             var wb = XLSX.read(data,{type:'array'});
-            worksheet = wb.Sheets[wb.SheetNames[0]];
-            importExcel(worksheet,wb.SheetNames[0]);
-            console.log(typeof(wb.SheetNames[0]));
+            for(i=0;i<wb.SheetNames.length;i++)
+            {
+                worksheet = wb.Sheets[wb.SheetNames[i]];
+                importExcel(worksheet,wb.SheetNames[i]);
+            }
             $('#Import_TB').hide();
         }
     });

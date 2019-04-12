@@ -40,6 +40,19 @@ class DataBaseManage
             }
         }
     }
+    public function selectAllTable()
+    {
+        $sql = "show tables;";
+        $this->result=mysqli_query($this->connObject,$sql);
+        $this->row = mysqli_num_rows($this->result);
+        $result_arr = array();
+        while($ass_arr = mysqli_fetch_assoc($this->result))
+        {
+            $result_arr[] = $ass_arr["Tables_in_openlab"];
+        }
+
+        return $result_arr;
+    }
     public function connect($Database_name)
     {
         $this->connObject = mysqli_connect($this->host,$this->username,$this->password);
@@ -56,16 +69,32 @@ class DataBaseManage
             }
         }
     }
+    public function TableExist($tablename)
+    {
+        $result_arr = $this->selectAllTable($tablename);
+        if(count($result_arr)==0)
+        {
+            return 0;
+        }
+        for($i = 0;$i<count($result_arr);$i++)
+        {
+            if($tablename == $result_arr[$i])
+            {
+                return -1;
+            }
+        }
+        return 0;
+    }
     public function createDatabase($databasename)
     {
         $sql ='create database ' . $databasename.";";
         if(mysqli_query($this->connObject,$sql))
         {
-            echo "create success!";
+            return true;
         }
         else
         {
-            echo "create failure!";
+            return false;
         }
     }
     public function dropDatabase($databasename)
@@ -85,11 +114,11 @@ class DataBaseManage
         $sql ="drop table " . $tablename.";";
         if(mysqli_query($this->connObject,$sql))
         {
-            echo "'drop table success!'";
+            return true;
         }
         else
         {
-            echo "'drop table failure!'";
+            return false;
         }
     }
     public function CreateTable($table_name,$content_First,$table_rowlen)
@@ -110,14 +139,12 @@ class DataBaseManage
                 $sql.= $content_First[$index]." ".$this->SQLDataType($content_First[$index])." NOT NULL,";
             }
         }
-        //echo $sql;
         if($table_name == '老师'|| $table_name == '学生')
         {
             $sql.= "密码  VARCHAR(20) NOT NULL);";
         }
         if(mysqli_query($this->connObject,$sql))
         {
-            echo "建表成功";
             return true;
         }
         else
@@ -128,27 +155,36 @@ class DataBaseManage
     public function ExcelToTable($table_name,$table_content,$table_rowlen)
     {
         $sql = "";
-        $temp = "";
-        //if($this->CreateTable($table_name,$table_content[1],$table_rowlen))
+        if($this->TableExist($table_name) != -1)
         {
-            for($index = 2;$index<count($table_content);$index++)
-            {
-                $temp = "INSERT INTO ".$table_name." VALUES"."( ";
-                for($indexJ = 0;$indexJ<$table_rowlen;$indexJ++)
-                {
-                    $temp.=$table_content[$index][$indexJ].",";
-                }
-                $temp.="123456);";
-                $sql.=$temp;
-            }
-            echo $sql;
-
-        //}
-       // else
-      //  {
-       //     echo "dasdasda";
+            $this->CreateTable($table_name,$table_content[1],$table_rowlen);
         }
 
+        for($index = 2;$index<count($table_content);$index++)
+        {
+            $temp = "INSERT INTO ".$table_name." VALUES"."( ";
+            for($indexJ = 0;$indexJ<$table_rowlen;$indexJ++)
+            {
+                if($indexJ == $table_rowlen-1)
+                {
+                    if($table_name == '老师'|| $table_name == '学生')
+                    {
+                        $temp.="'".$table_content[$index][$indexJ]."'".",";
+                        $temp.="123456);";
+                    }
+                    else
+                    {
+                        $temp.="'".$table_content[$index][$indexJ]."'".");";
+                    }
+                }
+                else
+                {
+                    $temp.="'".$table_content[$index][$indexJ]."'".",";
+                }
+            }
+            $sql.=$temp;
+        }
+        return mysqli_multi_query($this->connObject,$sql);
     }
     public function SQLDataType($SQLData)
     {
@@ -176,109 +212,54 @@ class DataBaseManage
     }
     public function Login($ID_Name,$Password,$IsTeacher)
     {
-        $type = gettype($ID_Name);
         if($IsTeacher)
         {
-            if($type == integer)
+            $return_SQL = "select 教师姓名,密码 from 老师 where 教师姓名 = "."'".$ID_Name."'".";";
+            $this->result = mysqli_query($this->connObject,$return_SQL);
+            $this->row = mysqli_num_rows($this->result);
+            if($this->row == 0)
             {
-                $return_SQL = "select 教师号,密码 from 老师 where 教师号 = ".$ID_Name;
-                $this->result = mysqli_query($this->connObject,$return_SQL);
-                $this->row = mysqli_num_rows($this->result);
-                if($this->row == 0)
-                {
-                    return -1;
-                }
-                else
-                {
-                    while($row = $this->result->fetch_assoc())
-                    {
-                        if($row["密码"] == $Password)
-                        {
-                            return 1;
-                        }
-                        else
-                        {
-                            return 0;
-                        }
-                    }
-                }
+                return -1;
             }
             else
             {
-                $return_SQL = "select 教师姓名,密码 from 老师 where 教师姓名 = ".$ID_Name;
-                $this->result = mysqli_query($this->connObject,$return_SQL);
-                $this->row = mysqli_num_rows($this->result);
-                if($this->row == 0)
+                while($row = $this->result->fetch_assoc())
                 {
-                    return -1;
-                }
-                else
-                {
-                    while($row = $this->result->fetch_assoc())
+                    if($row["密码"] == $Password)
                     {
-                        if($row["密码"] == $Password)
-                        {
-                            return 1;
-                        }
-                        else
-                        {
-                            return 0;
-                        }
+                        return 1;
+                    }
+                    else
+                    {
+                        return 0;
                     }
                 }
             }
         }
         else
         {
-            if($type == integer)
+            $return_SQL = "select 姓名,密码 from 学生 where 姓名 = "."'".$ID_Name."'".";";
+            $this->result = mysqli_query($this->connObject,$return_SQL);
+            $this->row = mysqli_num_rows($this->result);
+            echo $this->row;
+            if($this->row == 0)
             {
-                $return_SQL = "select 学号,密码 from 学生 where 学号 = ".$ID_Name;
-                $this->result = mysqli_query($this->connObject,$return_SQL);
-                $this->row = mysqli_num_rows($this->result);
-                if($this->row == 0)
-                {
-                    return -1;
-                }
-                else
-                {
-                    while($row = $this->result->fetch_assoc())
-                    {
-                        if($row["密码"] == $Password)
-                        {
-                            return 1;
-                        }
-                        else
-                        {
-                            return 0;
-                        }
-                    }
-                }
+                return -1;
             }
             else
             {
-                $return_SQL = "select 姓名,密码 from 学生 where 姓名 = ".$ID_Name;
-                $this->result = mysqli_query($this->connObject,$return_SQL);
-                $this->row = mysqli_num_rows($this->result);
-                if($this->row == 0)
+                while($row = $this->result->fetch_assoc())
                 {
-                    return -1;
-                }
-                else
-                {
-                    while($row = $this->result->fetch_assoc())
+                    if($row["密码"] == $Password)
                     {
-                        if($row["密码"] == $Password)
-                        {
-                            return 1;
-                        }
-                        else
-                        {
-                            return 0;
-                        }
+                        return 1;
+                    }
+                    else
+                    {
+                        return 0;
                     }
                 }
             }
         }
-
     }
 }
